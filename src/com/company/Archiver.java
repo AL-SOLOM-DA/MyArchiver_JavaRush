@@ -13,15 +13,7 @@ import java.nio.file.Paths;
 public class Archiver {
 
     public static void main(String[] args) throws Exception {
-       /* try
-            (BufferedReader reader = new BufferedReader(new InputStreamReader(System.in))){
-            System.out.println("Input archive's path: ");
-            ZipFileManager zipFileManager = new ZipFileManager(Paths.get(reader.readLine()));
 
-            System.out.println("Input file's path: ");
-            zipFileManager.createZip(Paths.get(reader.readLine()));
-
-        }*/
         Operation operation = null;
         do{
             try {
@@ -31,6 +23,7 @@ public class Archiver {
                 ConsoleHelper.writeMessage("You didn't choose archive's file or choose wrong fail");
             } catch (Exception e){
                 ConsoleHelper.writeMessage("Critical error! Check input data");
+                break;
             }
         } while (operation != Operation.EXIT);
     }

@@ -1,9 +1,13 @@
 package com.company;
 
+import com.company.exception.PathIsNotFoundException;
+
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -14,20 +18,42 @@ public class ZipFileManager {
         this.zipFile = zipFile;
     }
 
-    public void createZip(Path source) throws Exception{
-        try(ZipOutputStream zipOutputStream = new ZipOutputStream(Files.newOutputStream(zipFile));
-            InputStream inputStream = Files.newInputStream(source)) {
-
-            ZipEntry zipEntry = new ZipEntry(source.getFileName().toString());
+    private void addNewZipEntry(ZipOutputStream zipOutputStream, Path filePath, Path fileName) throws Exception{
+        try (InputStream inputStream = Files.newInputStream(filePath.resolve(fileName))){
+            ZipEntry zipEntry = new ZipEntry(fileName.toString());
             zipOutputStream.putNextEntry(zipEntry);
 
-            byte[] buffer = new byte[8*1024];
-            int len;
-            while ((len = inputStream.read(buffer))>0) {
+            copyData(inputStream, zipOutputStream);
 
-                zipOutputStream.write(buffer,0, len);
-            }
             zipOutputStream.closeEntry();
+        }
+    }
+
+    private void copyData(InputStream in, OutputStream out) throws Exception{
+        byte[] buf = new byte[8*1024];
+        int len;
+        while ((len = in.read(buf))>0){
+            out.write(buf, 0, len);
+        }
+    }
+
+    public void createZip(Path source) throws Exception{
+
+        if(Files.notExists(zipFile.getParent())) Files.createDirectory(zipFile.getParent());
+
+        try(ZipOutputStream zipOutputStream = new ZipOutputStream(Files.newOutputStream(zipFile))) {
+            if(Files.isRegularFile(source)) {
+                addNewZipEntry(zipOutputStream, source.getParent(), source.getFileName());
+            }
+            if(Files.isDirectory(source)){
+                List<Path> fileNames = new FileManager(source).getFileList();
+                for (Path fileName : fileNames) {
+                    addNewZipEntry(zipOutputStream, source, fileName);
+                }
+            }
+            else {
+                throw new PathIsNotFoundException();
+            }
         }
 
     }
