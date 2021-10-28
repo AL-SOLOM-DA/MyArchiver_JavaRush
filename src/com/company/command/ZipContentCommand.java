@@ -16,6 +16,6 @@ public class ZipContentCommand extends ZipCommand{
         for (FileProperties filePropertie: properties) {
             ConsoleHelper.writeMessage(filePropertie.toString());
         }
-        ConsoleHelper.writeMessage("Archive properties read.");
+        ConsoleHelper.writeMessage("Archive properties read.\n");
     }
 }
